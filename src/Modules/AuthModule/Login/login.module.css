@@ -1,0 +1,54 @@
+.loginContainer{
+    height: 50vh;
+    width: 40%; 
+    background: radial-gradient(#F8D442,#f2ca2c);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-self: center;
+  align-content: center;
+  
+  margin: auto;
+}
+
+.title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+  color: black;
+  text-align: center;
+  border-left: 6px solid #F8D442;
+ width: 78%;
+}
+.subTitle{
+     font-family: 'Montserrat', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: black; 
+}
+.desc{
+    font-weight: 200;
+    color: #6C6C6C;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+text-align: center !important;
+}
+.label {
+    color: #6C6C6C;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 300 !important; 
+    padding-bottom: 15px;
+}
+
+.formInput {
+    border: 1px solid #E5E5E5;
+    background-color: aliceblue;
+    font-weight: 300; 
+    font-family: 'Montserrat', sans-serif;
+}
+.formInput::placeholder {
+font-size: 12px;
+font-family: 'Montserrat';
+color: #E5E5E5;
+}

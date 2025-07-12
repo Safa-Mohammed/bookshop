@@ -96,7 +96,7 @@ const Register = () => {
         fullWidth
         margin="normal"
         autoComplete="off"
-        {...register("email", { ...emailValidation })}
+        {...register("email",)}
         error={!!errors.email}
         helperText={errors.email?.message}
       />

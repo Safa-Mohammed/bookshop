@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { AUTH_URLS } from "../../../constant/END-POINT";
-import { emailValidation } from "../../../constant/VALIDATION";
 import { AuthContext } from "../context/AuthContext";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -64,7 +63,6 @@ const Login: React.FC = () => {
         variant="outlined"
         fullWidth
         {...register("email", {
-          ...emailValidation,
         })}
         error={!!errors.email}
         helperText={errors.email ? errors.email.message : ""}

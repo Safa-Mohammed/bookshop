@@ -7,7 +7,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AUTH_URLS } from "../../../constant/END-POINT";
-import { AuthContext } from "../../../context/authContext";  // Adjust import path accordingly
+import { AuthContext } from "../../../context/authContext"; 
 
 interface FormValues {
   password: string;       // Current password

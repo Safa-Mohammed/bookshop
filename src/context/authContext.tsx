@@ -1,3 +1,4 @@
+// AuthContext.tsx
 import { jwtDecode } from "jwt-decode";
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
@@ -10,12 +11,13 @@ interface User {
 
 interface AuthContextType {
     userData: User | null;
+    isAuthenticated: boolean;
     saveUserData: () => void;
+    logout: () => void;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-// Create a custom hook for using the auth context
 export const useAuthContext = () => {
     const context = useContext(AuthContext);
     if (!context) {
@@ -34,19 +36,32 @@ export default function AuthContextProvider({ children }: AuthContextProviderPro
     const saveUserData = () => { 
         const encodedToken = localStorage.getItem("userToken");
         if (encodedToken) { 
-            const decodedToken = jwtDecode<User>(encodedToken);
-            setUserData(decodedToken);
+            try {
+                const decodedToken = jwtDecode<User>(encodedToken);
+                setUserData(decodedToken);
+            } catch (error) {
+                console.error("Token decoding failed:", error);
+                logout();
+            }
         }
+    };
+
+    const logout = () => {
+        localStorage.removeItem("userToken");
+        setUserData(null);
     };
  
     useEffect(() => {
-        if (localStorage.getItem("userToken")) {
-            saveUserData();
-        }
+        saveUserData();
     }, []);
 
     return (
-        <AuthContext.Provider value={{ userData, saveUserData }}>
+        <AuthContext.Provider value={{ 
+            userData, 
+            saveUserData,
+            logout,
+            isAuthenticated: !!userData
+        }}>
             {children}
         </AuthContext.Provider>
     );

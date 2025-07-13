@@ -1,5 +1,5 @@
 // src/pages/Cart.tsx
-import { useEffect, useContext, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -28,7 +28,7 @@ import {
   selectCart,
 } from "../Redux/cartSlice";
 import type { AppDispatch } from "../../../../../store";
-import { AuthContext } from "../../../../../context/authContext";
+import { useAuthContext } from "../../../../../context/authContext";
 import { ToastContainer, toast } from "react-toastify";
 import PaymentForm from "../Payment/PaymentForm";
 import "react-toastify/dist/ReactToastify.css";
@@ -42,11 +42,8 @@ const Cart = () => {
   const { cart, booksMap, loading } = useSelector(selectCart);
   const [showPayment, setShowPayment] = useState(false);
 
-  const authContext = useContext(AuthContext);
-  const token = authContext?.userData
-    ? localStorage.getItem("userToken")
-    : null;
-
+ const { isAuthenticated } = useAuthContext();
+const token = isAuthenticated ? localStorage.getItem("userToken") : null;
   useEffect(() => {
     if (!token) return;
     dispatch(fetchCart(token));
@@ -85,18 +82,13 @@ const handlePaymentSuccess = () => {
   const tax = +(subtotal * 0.045).toFixed(2);
   const totalCost = +(subtotal + tax).toFixed(2);
 
-  if (!token) {
+ if (!isAuthenticated) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="60vh"
-      >
-        <Typography variant="h6" color="error">
-          Please login to view your cart
-        </Typography>
-      </Box>
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+            <Typography variant="h6" color="error">
+                Please login to view your cart
+            </Typography>
+        </Box>
     );
   }
 

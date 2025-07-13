@@ -29,11 +29,13 @@ const Login: React.FC = () => {
       let response = await axios.post(AUTH_URLS.Login, data);
 
       localStorage.setItem("userToken", response?.data?.data?.accessToken);
-      saveUserData();
+      saveUserData(); // This should trigger context update
       toast.success(response?.data?.message || "Login successful!");
+      
+      // Wait for state to update before navigating
       setTimeout(() => {
         navigate("/dashboard/home");
-      }, 2000);
+      }, 500);
     } catch (error: any) {
       const errorMessage =
         error?.response?.data?.message || "Login failed. Please try again.";

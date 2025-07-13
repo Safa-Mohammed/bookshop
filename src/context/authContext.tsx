@@ -2,15 +2,28 @@ import { jwtDecode } from "jwt-decode";
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
+// Define your User interface
 interface User {
     id: string;
     name: string;
     email: string;
+    // Add any other required user properties here
+}
+
+// Define the expected JWT payload shape
+interface JwtPayload {
+    id: string;
+    name: string;
+    email: string;
+    iat?: number;
+    exp?: number;
+    [key: string]: any; // Allow additional properties
 }
 
 interface AuthContextType {
     userData: User | null;
     saveUserData: () => void;
+    logout: () => void;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -32,39 +45,67 @@ export default function AuthContextProvider({ children }: AuthContextProviderPro
 
     const saveUserData = () => { 
         const token = localStorage.getItem("userToken");
-        if (token) {
-            try {
-                const decoded = jwtDecode<{ // Explicitly type the decoded token
-                    id: string;
-                    name: string;
-                    email: string;
-                    // Add other expected claims here
-                }>(token);
-                
-                // Map the decoded token to your User interface
-                const user: User = {
-                    id: decoded.id,
-                    name: decoded.name,
-                    email: decoded.email
-                };
-                
-                setUserData(user);
-            } catch (error) {
-                console.error("Invalid token", error);
-                localStorage.removeItem("userToken");
-                setUserData(null);
+        if (!token) {
+            setUserData(null);
+            return;
+        }
+
+        try {
+            const decoded = jwtDecode<JwtPayload>(token);
+            
+            // Validate required fields
+            if (!decoded.id || !decoded.email) {
+                throw new Error("Invalid token structure");
             }
-        } else {
+
+            // Check token expiration
+            if (decoded.exp && Date.now() >= decoded.exp * 1000) {
+                throw new Error("Token expired");
+            }
+
+            // Map to User interface
+            const user: User = {
+                id: decoded.id,
+                name: decoded.name || '', // Provide default if optional
+                email: decoded.email
+            };
+
+            setUserData(user);
+        } catch (error) {
+            console.error("Authentication error:", error);
+            localStorage.removeItem("userToken");
             setUserData(null);
         }
     };
+
+    const logout = () => {
+        localStorage.removeItem("userToken");
+        setUserData(null);
+    };
  
     useEffect(() => {
-        saveUserData(); // Always try to load user data on initial render
+        saveUserData();
+        
+        // Optional: Add token refresh logic or periodic validation
+        const interval = setInterval(() => {
+            const token = localStorage.getItem("userToken");
+            if (token) {
+                try {
+                    const { exp } = jwtDecode(token);
+                    if (exp && Date.now() >= exp * 1000) {
+                        logout();
+                    }
+                } catch (error) {
+                    logout();
+                }
+            }
+        }, 60000); // Check every minute
+
+        return () => clearInterval(interval);
     }, []);
 
     return (
-        <AuthContext.Provider value={{ userData, saveUserData }}>
+        <AuthContext.Provider value={{ userData, saveUserData, logout }}>
             {children}
         </AuthContext.Provider>
     );

@@ -15,7 +15,6 @@ interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-// Create a custom hook for using the auth context
 export const useAuthContext = () => {
     const context = useContext(AuthContext);
     if (!context) {
@@ -32,17 +31,36 @@ export default function AuthContextProvider({ children }: AuthContextProviderPro
     const [userData, setUserData] = useState<User | null>(null);
 
     const saveUserData = () => { 
-        const encodedToken = localStorage.getItem("userToken");
-        if (encodedToken) { 
-            const decodedToken = jwtDecode<User>(encodedToken);
-            setUserData(decodedToken);
+        const token = localStorage.getItem("userToken");
+        if (token) {
+            try {
+                const decoded = jwtDecode<{ // Explicitly type the decoded token
+                    id: string;
+                    name: string;
+                    email: string;
+                    // Add other expected claims here
+                }>(token);
+                
+                // Map the decoded token to your User interface
+                const user: User = {
+                    id: decoded.id,
+                    name: decoded.name,
+                    email: decoded.email
+                };
+                
+                setUserData(user);
+            } catch (error) {
+                console.error("Invalid token", error);
+                localStorage.removeItem("userToken");
+                setUserData(null);
+            }
+        } else {
+            setUserData(null);
         }
     };
  
     useEffect(() => {
-        if (localStorage.getItem("userToken")) {
-            saveUserData();
-        }
+        saveUserData(); // Always try to load user data on initial render
     }, []);
 
     return (

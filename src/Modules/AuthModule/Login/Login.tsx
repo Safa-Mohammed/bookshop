@@ -10,7 +10,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { saveUserData }: any = useContext(AuthContext);
+  const { saveUserData } = useContext(AuthContext);
 
   interface ValuesForm {
     username: string;
@@ -26,20 +26,34 @@ const Login: React.FC = () => {
 
   const onSubmit = async (data: ValuesForm) => {
     try {
-      let response = await axios.post(AUTH_URLS.Login, data);
-
-      localStorage.setItem("userToken", response?.data?.data?.accessToken);
-      saveUserData();
+      const response = await axios.post(AUTH_URLS.Login, data);
+      
+      // Ensure the response contains the token
+      if (!response?.data?.data?.accessToken) {
+        throw new Error("No access token received");
+      }
+      
+      // Save token to localStorage
+      localStorage.setItem("userToken", response.data.data.accessToken);
+      
+      // Update auth context
+      saveUserData(); // This should decode the token and set user data
+      
+      // Show success message
       toast.success(response?.data?.message || "Login successful!");
+      
+      // Redirect after delay
       setTimeout(() => {
         navigate("/dashboard/home");
       }, 2000);
+      
     } catch (error: any) {
-      const errorMessage =
-        error?.response?.data?.message || "Login failed. Please try again.";
-      toast.error("Login failed. Please try again");
-
-      console.error("Login error:", errorMessage);
+      const errorMessage = error?.response?.data?.message || "Login failed. Please try again.";
+      toast.error(errorMessage);
+      console.error("Login error:", error);
+      
+      // Clear any invalid token if login fails
+      localStorage.removeItem("userToken");
     }
   };
 
